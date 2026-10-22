@@ -1,23 +1,20 @@
 import { Component, effect, inject, signal, untracked } from '@angular/core';
 import { NonNullableFormBuilder } from '@angular/forms';
 import { PROFIL_FIELDS, Profil } from '../../core/models/profil';
-import { MailjetService } from '../../core/services/mailjet.service';
 import { ProfilService } from '../../core/services/profil.service';
 import { InfoFormGroup, createInfoGroup, readInfo } from '../../core/utils/info-form';
 import { InfoForm } from '../../shared/components/info-form/info-form';
 import { CompletionBar } from '../../shared/components/completion-bar/completion-bar';
-import { MailjetConfig } from '../../shared/components/mailjet-config/mailjet-config';
 
 @Component({
   selector: 'app-profil-page',
-  imports: [InfoForm, CompletionBar, MailjetConfig],
+  imports: [InfoForm, CompletionBar],
   templateUrl: './profil-page.html',
   styleUrl: './profil-page.scss',
 })
 export class ProfilPage {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly profilService = inject(ProfilService);
-  private readonly mailjetService = inject(MailjetService);
 
   protected readonly completion = this.profilService.completion;
   protected readonly fields = PROFIL_FIELDS;
@@ -40,9 +37,6 @@ export class ProfilPage {
         this.profilGroup.reset(profil as unknown as Record<string, string>);
       });
     });
-
-    // On charge le compte Mailjet personnel (s'il existe).
-    void this.mailjetService.charger();
   }
 
   protected save(): void {

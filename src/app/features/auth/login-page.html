@@ -137,11 +137,7 @@
         </button>
       </form>
 
-      @if (mode() === 'inscription') {
-        <div class="auth__mailjet">
-          <app-mailjet-config #mailjet [autoSave]="false" />
-        </div>
-      }
+      
 
       <footer class="auth__foot">
         @if (mode() === 'connexion') {
