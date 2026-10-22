@@ -1,0 +1,162 @@
+<div class="auth">
+  <!-- ============ Panneau de marque ============ -->
+  <aside class="auth__aside">
+    <div class="auth__brand">
+      <span class="auth__logo">SS</span>
+      <span class="auth__brandname">Suivi Stage</span>
+    </div>
+
+    <h2 class="auth__headline">
+      Tes candidatures de stage,<br />
+      <span class="auth__headline-accent">toujours sous la main.</span>
+    </h2>
+
+    <p class="auth__pitch">
+      Suis tes offres et tes candidatures spontanées, relance tes recruteurs au bon moment et
+      retrouve tout sur tous tes appareils.
+    </p>
+
+    <ul class="auth__features">
+      <li><span class="auth__feature-ico">🔔</span> Relances automatiques chaque semaine</li>
+      <li><span class="auth__feature-ico">☁️</span> Synchronisé avec Supabase</li>
+      <li><span class="auth__feature-ico">📦</span> Offres et spontanées au même endroit</li>
+    </ul>
+  </aside>
+
+  <!-- ============ Panneau du formulaire ============ -->
+  <main class="auth__panel">
+    <div class="auth__card">
+      <div class="auth__tabs" role="tablist" aria-label="Connexion ou inscription">
+        <button
+          type="button"
+          role="tab"
+          class="auth__tab"
+          [class.is-active]="mode() === 'connexion'"
+          [attr.aria-selected]="mode() === 'connexion'"
+          (click)="setMode('connexion')"
+        >
+          Connexion
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="auth__tab"
+          [class.is-active]="mode() === 'inscription'"
+          [attr.aria-selected]="mode() === 'inscription'"
+          (click)="setMode('inscription')"
+        >
+          Créer un compte
+        </button>
+        <span class="auth__tab-glider" aria-hidden="true"></span>
+      </div>
+
+      <header class="auth__head">
+        <h1>
+          @if (mode() === 'connexion') {
+            Content de te revoir
+          } @else {
+            Crée ton compte
+          }
+        </h1>
+        <p>
+          @if (mode() === 'connexion') {
+            Connecte-toi pour retrouver tes candidatures sur tous tes appareils.
+          } @else {
+            Tes candidatures seront synchronisées avec Supabase dès la première connexion.
+          }
+        </p>
+      </header>
+
+      @if (!auth.disponible) {
+        <p class="auth__alerte auth__alerte--warn">
+          ⚠️ Supabase n'est pas configuré (variables <code>SUPABASE_URL</code> et
+          <code>SUPABASE_ANON_KEY</code> manquantes). L'app fonctionne en mode local : tes données
+          restent dans ce navigateur.
+        </p>
+      }
+
+      <form (submit)="$event.preventDefault(); soumettre()">
+        <div class="field">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            autocomplete="email"
+            placeholder="toi@email.com"
+            [formControl]="form.controls.email"
+          />
+          @if (form.controls.email.touched && form.controls.email.invalid) {
+            <span class="field__error">Email invalide.</span>
+          }
+        </div>
+
+        <div class="field">
+          <label for="motDePasse">Mot de passe</label>
+          <div class="auth__pwd">
+            <input
+              id="motDePasse"
+              [type]="mdpVisible() ? 'text' : 'password'"
+              [autocomplete]="mode() === 'connexion' ? 'current-password' : 'new-password'"
+              placeholder="6 caractères minimum"
+              [formControl]="form.controls.motDePasse"
+            />
+            <button
+              type="button"
+              class="auth__pwd-toggle"
+              [attr.aria-label]="mdpVisible() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+              (click)="mdpVisible.set(!mdpVisible())"
+            >
+              {{ mdpVisible() ? '🙈' : '👁️' }}
+            </button>
+          </div>
+          @if (form.controls.motDePasse.touched && form.controls.motDePasse.invalid) {
+            <span class="field__error">Mot de passe requis (6 caractères min.).</span>
+          }
+        </div>
+
+        @if (auth.erreur(); as erreur) {
+          <p class="auth__alerte auth__alerte--error">{{ erreur }}</p>
+        }
+        @if (auth.message(); as message) {
+          <p class="auth__alerte auth__alerte--ok">{{ message }}</p>
+        }
+
+        <button
+          type="submit"
+          class="btn btn--primary btn--large btn--block auth__submit"
+          [disabled]="busy()"
+        >
+          @if (busy()) {
+            <span class="auth__spinner" aria-hidden="true"></span>
+            Patiente…
+          } @else if (mode() === 'connexion') {
+            Se connecter
+          } @else {
+            Créer mon compte
+          }
+        </button>
+      </form>
+
+      <footer class="auth__foot">
+        @if (mode() === 'connexion') {
+          <button type="button" class="auth__link" (click)="motDePasseOublie()">
+            Mot de passe oublié ?
+          </button>
+          <p class="auth__foot-text">
+            Pas encore de compte ?
+            <button type="button" class="auth__link auth__link--strong" (click)="setMode('inscription')">
+              Créer un compte
+            </button>
+          </p>
+        } @else {
+          <p class="auth__foot-text">
+            Déjà un compte ?
+            <button type="button" class="auth__link auth__link--strong" (click)="setMode('connexion')">
+              Se connecter
+            </button>
+          </p>
+        }
+      </footer>
+    </div>
+  </main>
+</div>

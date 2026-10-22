@@ -1,0 +1,48 @@
+<dialog #dialog class="relance">
+  <form [formGroup]="form" (ngSubmit)="marquerEnvoyee()">
+    <header class="relance__head">
+      <h3>Relancer l'entreprise</h3>
+      <button type="button" class="btn btn--ghost" (click)="close()">✕</button>
+    </header>
+
+    <div class="relance__body">
+      <p class="relance__hint">
+        Le brouillon est pré-rempli avec les infos de l'entreprise et ta signature.
+        Tu peux relancer chaque semaine : le compteur repart de la dernière relance.
+      </p>
+
+      <div class="field">
+        <label for="r-destinataire">Destinataire <em>*</em></label>
+        <input
+          id="r-destinataire"
+          type="email"
+          formControlName="destinataire"
+          placeholder="recrutement@entreprise.com"
+        />
+        @if (form.get('destinataire')?.invalid && form.get('destinataire')?.touched) {
+          <small class="field__error">Email de contact manquant ou invalide.</small>
+        }
+      </div>
+
+      <div class="field">
+        <label for="r-objet">Objet <em>*</em></label>
+        <input id="r-objet" formControlName="objet" />
+      </div>
+
+      <div class="field">
+        <label for="r-corps">Message</label>
+        <textarea id="r-corps" rows="12" formControlName="corps"></textarea>
+      </div>
+    </div>
+
+    <footer class="relance__foot">
+      <button type="button" class="btn btn--ghost" (click)="copier()">
+        {{ copie() ? 'Copié ✓' : 'Copier le message' }}
+      </button>
+      <a class="btn btn--ghost" [href]="lienMailto()">Ouvrir dans Outlook</a>
+      <button type="submit" class="btn btn--primary" [disabled]="form.invalid">
+        Marquer la relance envoyée
+      </button>
+    </footer>
+  </form>
+</dialog>

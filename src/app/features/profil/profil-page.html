@@ -1,0 +1,24 @@
+<section class="profil">
+  <header class="profil__head">
+    <h2>Mes informations</h2>
+    <p>
+      C'est <strong>toi</strong>, pas l'entreprise. Ces infos servent à signer tes
+      relances (nom, email, téléphone). Le <strong>nom est obligatoire</strong>.
+    </p>
+  </header>
+
+  <div class="profil__completion">
+    <app-completion-bar [completion]="completion()" />
+  </div>
+
+  <form (submit)="$event.preventDefault(); save()">
+    <app-info-form [control]="profilGroup" [fields]="fields" />
+
+    <footer class="profil__foot">
+      <button type="button" class="btn btn--ghost" (click)="reset()">Vider</button>
+      <button type="submit" class="btn btn--primary">
+        {{ saved() ? 'Enregistré ✓' : 'Enregistrer' }}
+      </button>
+    </footer>
+  </form>
+</section>

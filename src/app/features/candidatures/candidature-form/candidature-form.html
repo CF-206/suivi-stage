@@ -1,0 +1,143 @@
+<dialog #dialog class="candidature-form">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <header class="candidature-form__head">
+      <h3>
+        @if (existing()) {
+          Modifier la candidature
+        } @else if (origineEffective() === 'offre') {
+          Ajouter une offre
+        } @else {
+          Ajouter une candidature spontanée
+        }
+      </h3>
+      <button type="button" class="btn btn--ghost" (click)="close()">✕</button>
+    </header>
+
+    <div class="candidature-form__body">
+      <!-- ============ L'ENTREPRISE ============ -->
+      <section class="section">
+        <h4>L'entreprise</h4>
+        <p class="hint">
+          Ce sont les infos de l'entreprise (contact, site, LinkedIn, ville). Elles te
+          servent à la <strong>relance</strong>. Renseigne un maximum.
+        </p>
+
+        <app-completion-bar [completion]="completionEntreprise()" />
+
+        @if (entrepriseReconnue(); as nom) {
+          <p class="reprise">✓ Infos reprises pour « {{ nom }} »</p>
+        }
+
+        <div formGroupName="entreprise">
+          <app-info-form
+            [control]="entrepriseGroup"
+            [fields]="entrepriseFields()"
+          />
+        </div>
+      </section>
+
+      @if (origineEffective() === 'offre') {
+        <!-- ============ L'OFFRE ============ -->
+        <section class="section">
+          <h4>L'offre</h4>
+          <div class="grid">
+            <div class="field">
+              <label for="c-poste">Poste <em>*</em></label>
+              <input id="c-poste" formControlName="poste" placeholder="Développeur Web Angular" />
+            </div>
+
+            <div class="field">
+              <label for="c-lieu">Lieu</label>
+              <input id="c-lieu" formControlName="lieu" placeholder="Lille" />
+            </div>
+
+            <div class="field">
+              <label for="c-type">Type de contrat</label>
+              <input id="c-type" formControlName="type" placeholder="Stage / Alternance / CDD" />
+            </div>
+
+            <div class="field">
+              <label for="c-statut">Statut</label>
+              <select id="c-statut" formControlName="statut">
+                @for (s of statuts; track s) {
+                  <option [value]="s">{{ statutLabels[s] }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="c-datedepot">Candidature envoyée le</label>
+              <input id="c-datedepot" type="date" formControlName="dateDepot" />
+            </div>
+
+            <div class="field">
+              <label for="c-datelimite">Date limite de l'offre</label>
+              <input id="c-datelimite" type="date" formControlName="dateLimit" />
+            </div>
+
+            <div class="field">
+              <label for="c-lien">Lien de l'offre</label>
+              <input id="c-lien" type="url" formControlName="lien" placeholder="https://…" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="c-notes">Notes</label>
+            <textarea
+              id="c-notes"
+              rows="3"
+              formControlName="notes"
+              placeholder="Détails, contacts, points à mentionner…"
+            ></textarea>
+          </div>
+        </section>
+      } @else {
+        <!-- ============ CANDIDATURE SPONTANÉE ============ -->
+        <section class="section">
+          <h4>Ma candidature spontanée</h4>
+          <p class="hint">
+            Tu n'as qu'à donner les infos de l'entreprise ci-dessus. La relance
+            automatique se déclenche <strong>une semaine après</strong> l'envoi.
+          </p>
+
+          <div class="field">
+            <label for="c-poste-sp">Poste visé (optionnel)</label>
+            <input
+              id="c-poste-sp"
+              formControlName="poste"
+              placeholder="Développeur Web Angular"
+            />
+          </div>
+        </section>
+      }
+
+      <!-- ============ MOI ============ -->
+      <section class="section section--moi">
+        <h4>Moi (pour la relance)</h4>
+        <p class="hint">
+          Le <strong>nom est obligatoire</strong>. Ces infos servent à signer tes
+          relances.
+        </p>
+
+        <app-completion-bar [completion]="completionProfil()" />
+
+        <div formGroupName="candidat">
+          <app-info-form [control]="profilGroup" [fields]="profilFields" />
+        </div>
+      </section>
+    </div>
+
+    <footer class="candidature-form__foot">
+      <button type="button" class="btn btn--ghost" (click)="close()">Annuler</button>
+      <button type="submit" class="btn btn--primary" [disabled]="form.invalid">
+        @if (existing()) {
+          Enregistrer
+        } @else if (origineEffective() === 'offre') {
+          Ajouter l'offre
+        } @else {
+          Ajouter la candidature
+        }
+      </button>
+    </footer>
+  </form>
+</dialog>

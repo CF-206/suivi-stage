@@ -1,1 +1,325 @@
-/* You can add global styles to this file, and also import other style files */
+/* =============================================================================
+   Suivi Stage — feuille de style globale (design system)
+   ============================================================================= */
+
+/* --- 1. Tokens ------------------------------------------------------------ */
+:root {
+  /* Palette principale */
+  --primary: #4f46e5;
+  --primary-strong: #4338ca;
+  --primary-soft: #eef2ff;
+  --violet: #7c3aed;
+  --violet-soft: #f5f3ff;
+  --pink: #db2777;
+
+  /* Surfaces & textes */
+  --bg: #f4f5fb;
+  --surface: #ffffff;
+  --surface-alt: #f1f3f9;
+  --border: #e4e7f2;
+  --border-strong: #d2d8ea;
+  --text: #171a2b;
+  --text-soft: #4a5068;
+  --text-muted: #767d95;
+
+  /* États */
+  --success: #059669;
+  --success-soft: #ecfdf5;
+  --warn: #d97706;
+  --warn-soft: #fffbeb;
+  --danger: #dc2626;
+  --danger-soft: #fef2f2;
+  --info: #0284c7;
+
+  /* Dégradés */
+  --gradient-primary: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #9333ea 100%);
+  --gradient-brand: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  --gradient-surface: linear-gradient(180deg, #ffffff 0%, #fbfbfe 100%);
+
+  /* Rayons */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --r-full: 999px;
+
+  /* Ombres */
+  --shadow-xs: 0 1px 2px rgb(23 26 43 / 6%);
+  --shadow-sm: 0 2px 8px rgb(23 26 43 / 6%);
+  --shadow-md: 0 8px 24px rgb(23 26 43 / 8%);
+  --shadow-lg: 0 20px 50px rgb(23 26 43 / 14%);
+  --shadow-primary: 0 8px 20px rgb(79 70 229 / 28%);
+
+  /* Anneau de focus */
+  --ring: 0 0 0 3px rgb(99 102 241 / 24%);
+}
+
+/* --- 2. Reset ------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(1100px 620px at 8% -12%, #e6e8ff 0%, transparent 62%),
+    radial-gradient(900px 520px at 102% -4%, #f3e6ff 0%, transparent 58%),
+    var(--bg);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: -0.015em;
+}
+
+::selection {
+  background: rgb(99 102 241 / 22%);
+}
+
+/* --- 3. Boutons ------------------------------------------------------------ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.58rem 1.05rem;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+
+  /* Primaire : dégradé indigo → violet */
+  &--primary {
+    background: var(--gradient-primary);
+    color: #fff;
+    box-shadow: var(--shadow-primary);
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgb(79 70 229 / 38%);
+    }
+
+    &:disabled {
+      background: #c3c7f5;
+      box-shadow: none;
+    }
+  }
+
+  /* Fantôme : contour discret */
+  &--ghost {
+    background: var(--surface);
+    border-color: var(--border-strong);
+    color: var(--text-soft);
+
+    &:hover:not(:disabled) {
+      background: var(--primary-soft);
+      border-color: var(--primary);
+      color: var(--primary-strong);
+    }
+  }
+
+  /* Soft : fond teinté */
+  &--soft {
+    background: var(--primary-soft);
+    color: var(--primary-strong);
+
+    &:hover:not(:disabled) {
+      background: #e0e7ff;
+    }
+  }
+
+  /* Danger : contour rouge */
+  &--danger {
+    background: var(--surface);
+    border-color: #f6c9c9;
+    color: var(--danger);
+
+    &:hover:not(:disabled) {
+      background: var(--danger-soft);
+      border-color: var(--danger);
+    }
+  }
+
+  &--small {
+    padding: 0.36rem 0.72rem;
+    font-size: 0.82rem;
+    border-radius: 7px;
+  }
+
+  &--large {
+    padding: 0.78rem 1.4rem;
+    font-size: 0.98rem;
+    border-radius: var(--r-md);
+  }
+
+  &--block {
+    width: 100%;
+  }
+
+  &.is-active {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    color: var(--primary-strong);
+  }
+}
+
+/* --- 4. Champs de formulaire --------------------------------------------- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-soft);
+
+    em {
+      color: var(--danger);
+      font-style: normal;
+    }
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    color: inherit;
+    font: inherit;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+
+    &::placeholder {
+      color: #a7adc0;
+    }
+
+    &:hover:not(:focus) {
+      border-color: var(--border-strong);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: var(--ring);
+    }
+
+    &.is-invalid {
+      border-color: var(--danger);
+    }
+  }
+
+  select {
+    appearance: none;
+    padding-right: 2.1rem;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23767d95' d='M1 1.5 6 6.5l5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    cursor: pointer;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  &__error {
+    color: var(--danger);
+    font-size: 0.76rem;
+    font-weight: 500;
+  }
+
+  &__hint {
+    color: var(--text-muted);
+    font-size: 0.76rem;
+  }
+}
+
+/* --- 5. Éléments partagés ------------------------------------------------ */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--r-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--surface-alt);
+  color: var(--text-soft);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.16rem 0.55rem;
+  border-radius: 6px;
+  background: var(--surface-alt);
+  font-size: 0.75rem;
+  color: var(--text-soft);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 2.5rem 1rem;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--r-lg);
+  background: rgb(255 255 255 / 55%);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.btn--small {
+  padding: 0.36rem 0.72rem;
+  font-size: 0.82rem;
+}

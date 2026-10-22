@@ -6,6 +6,14 @@
 /out-tsc
 /bazel-out
 
+# Variables d'environnement (Supabase)
+.env
+.env.local
+/src/environments/environment.ts
+
+# Supabase CLI
+supabase/.temp
+
 # Node
 /node_modules
 npm-debug.log

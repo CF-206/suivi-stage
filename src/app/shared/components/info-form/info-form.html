@@ -1,0 +1,24 @@
+<div class="info-form" [formGroup]="control()">
+  @for (f of fields(); track f.key) {
+    <div class="field">
+      <label class="field__label" [attr.for]="'f-' + f.key">
+        {{ f.label }}
+        @if (f.required) {
+          <span class="field__required">obligatoire</span>
+        }
+      </label>
+
+      <input
+        [id]="'f-' + f.key"
+        [type]="f.type"
+        [formControlName]="f.key"
+        [placeholder]="f.placeholder"
+        [class.is-invalid]="isInvalid(f.key)"
+      />
+
+      @if (isInvalid(f.key)) {
+        <small class="field__error">{{ errorMessage(f.key) }}</small>
+      }
+    </div>
+  }
+</div>

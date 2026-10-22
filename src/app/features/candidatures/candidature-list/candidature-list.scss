@@ -1,0 +1,143 @@
+.candidatures {
+  padding: 1.75rem 1.5rem 3rem;
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+    }
+  }
+
+  &__subtitle {
+    margin: 0.25rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.87rem;
+  }
+
+  &__relance {
+    color: #be123c;
+    font-weight: 700;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  &__filters {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+    padding: 0.7rem;
+    border-radius: var(--r-lg);
+    background: rgb(255 255 255 / 65%);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-xs);
+
+    input,
+    select {
+      padding: 0.55rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      background: var(--surface);
+      color: inherit;
+      font: inherit;
+      transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: var(--ring);
+      }
+    }
+
+    input {
+      flex: 1;
+      min-width: 220px;
+    }
+  }
+}
+
+.section {
+  margin-bottom: 2.75rem;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid var(--primary-soft);
+
+    h3 {
+      margin: 0;
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--primary-strong);
+    }
+  }
+
+  &__count {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  /* Section spontanée : accent violet */
+  &--spontanee {
+    .section__head {
+      border-bottom-color: var(--violet-soft);
+
+      h3 {
+        color: var(--violet);
+      }
+    }
+  }
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.btn.is-active {
+  border-color: var(--primary);
+  color: var(--primary-strong);
+  background: var(--primary-soft);
+}
+
+.btn--small {
+  padding: 0.36rem 0.72rem;
+  font-size: 0.85rem;
+  margin-left: auto;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2.5rem 1rem;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--r-lg);
+  background: rgb(255 255 255 / 55%);
+  color: var(--text-muted);
+  text-align: center;
+
+  p {
+    margin: 0;
+    max-width: 48ch;
+  }
+}

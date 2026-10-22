@@ -1,0 +1,61 @@
+<a
+  class="card"
+  [class.is-archived]="candidature().statut === 'archive'"
+  [routerLink]="['/candidatures', candidature().id]"
+>
+  <div class="card__top">
+    <span class="card__avatar">{{ initiales(candidature().entreprise.nom) || '??' }}</span>
+    <span class="chip" [attr.data-statut]="candidature().statut">
+      {{ statutLabels[candidature().statut] }}
+    </span>
+  </div>
+
+  <h3 class="card__poste">
+    {{ candidature().poste || candidature().entreprise.nom || 'Poste à préciser' }}
+  </h3>
+  <p class="card__entreprise">
+    {{ candidature().entreprise.nom || 'Entreprise à préciser' }}
+  </p>
+
+  <div class="card__dates">
+    @if (candidature().dateDepot) {
+      <span class="tag">📩 Envoyée le {{ fmt(candidature().dateDepot) }}</span>
+    }
+    @if (candidature().dateLimit) {
+      <span
+        class="tag"
+        [class.tag--warn]="(joursRestants(candidature().dateLimit) ?? 99) <= 7"
+      >
+        ⏳ Limite : {{ fmt(candidature().dateLimit) }}
+      </span>
+    }
+    @if (candidature().dateRelance) {
+      <span class="tag">↺ Relancée le {{ fmt(candidature().dateRelance) }}</span>
+    }
+  </div>
+
+  <div class="card__meta">
+    @if (candidature().lieu) {
+      <span class="tag">📍 {{ candidature().lieu }}</span>
+    }
+    @if (candidature().type) {
+      <span class="tag">{{ candidature().type }}</span>
+    }
+    @if (candidature().entreprise.ville) {
+      <span class="tag">🏢 {{ candidature().entreprise.ville }}</span>
+    }
+    @if (relanceDue()) {
+      <span class="tag tag--relance">🔔 Relance à faire</span>
+    } @else if (joursAvantRelance() !== null) {
+      <span class="tag">🔔 Relance dans {{ joursAvantRelance() }}j</span>
+    }
+    @if (candidature().entreprise.email) {
+      <span class="tag tag--mail">✉️ Contact dispo</span>
+    }
+  </div>
+
+  <footer class="card__foot">
+    <app-completion-bar [compact]="true" [completion]="completion()" />
+    <span class="card__link">Voir la fiche →</span>
+  </footer>
+</a>

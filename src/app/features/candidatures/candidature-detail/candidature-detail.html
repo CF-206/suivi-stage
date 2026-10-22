@@ -1,0 +1,313 @@
+@if (notFound()) {
+  <div class="notfound">
+    <h2>Candidature introuvable</h2>
+    <a routerLink="/candidatures" class="btn btn--primary">Retour à la liste</a>
+  </div>
+} @else if (candidature(); as c) {
+  <section class="fiche">
+    <a routerLink="/candidatures" class="fiche__back">← Retour</a>
+
+    <header class="fiche__head">
+      <span class="fiche__avatar">{{ initiales(c.entreprise.nom) || '??' }}</span>
+
+      <div class="fiche__title">
+        <h1>{{ c.poste || c.entreprise.nom || 'Poste à préciser' }}</h1>
+        <p>{{ c.entreprise.nom || 'Entreprise à préciser' }}</p>
+        <span class="fiche__origine" [attr.data-origine]="c.origine">
+          {{ c.origine === 'spontanee' ? 'Candidature spontanée' : 'Réponse à une offre' }}
+        </span>
+      </div>
+
+      <div class="fiche__actions">
+        @if (relanceDue()) {
+          <span
+            class="indicateur indicateur--relance"
+            title="Cliquer pour préparer le brouillon de relance"
+            (click)="relanceRef.open()"
+          >
+            🔔 Relance à faire
+          </span>
+        }
+        <button type="button" class="btn btn--ghost" (click)="formRef.open()">
+          Modifier
+        </button>
+        <button type="button" class="btn btn--danger" (click)="remove()">
+          Supprimer
+        </button>
+      </div>
+    </header>
+
+    <div class="fiche__grid">
+      <!-- ============ L'ENTREPRISE + LE RECRUTEUR ============ -->
+      <div class="fiche__col">
+        <div class="panel panel--accent">
+          <h3>L'entreprise</h3>
+          <app-completion-bar [completion]="completionEntreprise()" />
+
+          <dl>
+            <div>
+              <dt>Nom</dt>
+              <dd>{{ c.entreprise.nom || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Email</dt>
+              <dd>
+                @if (c.entreprise.email) {
+                  <a [href]="'mailto:' + c.entreprise.email">{{ c.entreprise.email }}</a>
+                } @else {
+                  <span class="muted">non renseigné</span>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>Téléphone</dt>
+              <dd>
+                @if (c.entreprise.telephone) {
+                  <a [href]="'tel:' + c.entreprise.telephone">{{ c.entreprise.telephone }}</a>
+                } @else {
+                  <span class="muted">non renseigné</span>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>LinkedIn</dt>
+              <dd>
+                @if (c.entreprise.linkedin) {
+                  <a [href]="c.entreprise.linkedin" target="_blank" rel="noopener">Voir la page ↗</a>
+                } @else {
+                  <span class="muted">non renseigné</span>
+                }
+              </dd>
+            </div>
+            @if (c.origine !== 'spontanee') {
+              <div>
+                <dt>Site web</dt>
+                <dd>
+                  @if (c.entreprise.siteWeb) {
+                    <a [href]="c.entreprise.siteWeb" target="_blank" rel="noopener">Ouvrir ↗</a>
+                  } @else {
+                    <span class="muted">non renseigné</span>
+                  }
+                </dd>
+              </div>
+              <div>
+                <dt>Ville</dt>
+                <dd>{{ c.entreprise.ville || '—' }}</dd>
+              </div>
+              <div>
+                <dt>Secteur</dt>
+                <dd>{{ c.entreprise.secteur || '—' }}</dd>
+              </div>
+            }
+          </dl>
+        </div>
+
+        <!-- ============ LE RECRUTEUR ============ -->
+        <div class="panel panel--recruteur">
+          <h3>Le recruteur</h3>
+
+          @if (recruteur()) {
+            <div class="recruteur">
+              <span class="recruteur__avatar">{{ initiales(recruteur()) }}</span>
+              <div class="recruteur__nom">
+                <strong>{{ recruteur() }}</strong>
+                @if (c.entreprise.contactCivilite) {
+                  <span>{{ c.entreprise.contactCivilite }}</span>
+                }
+              </div>
+            </div>
+
+            <dl>
+              <div>
+                <dt>Email</dt>
+                <dd>
+                  @if (c.entreprise.email) {
+                    <a [href]="'mailto:' + c.entreprise.email">{{ c.entreprise.email }}</a>
+                  } @else {
+                    <span class="muted">non renseigné</span>
+                  }
+                </dd>
+              </div>
+              <div>
+                <dt>Téléphone</dt>
+                <dd>
+                  @if (c.entreprise.telephone) {
+                    <a [href]="'tel:' + c.entreprise.telephone">{{ c.entreprise.telephone }}</a>
+                  } @else {
+                    <span class="muted">non renseigné</span>
+                  }
+                </dd>
+              </div>
+            </dl>
+
+            <div class="recruteur__actions">
+              <button
+                type="button"
+                class="btn btn--ghost btn--small"
+                (click)="relanceRef.open()"
+              >
+                🔔 Préparer la relance
+              </button>
+              @if (c.entreprise.email) {
+                <a class="btn btn--ghost btn--small" [href]="'mailto:' + c.entreprise.email">
+                  ✉️ Écrire
+                </a>
+              }
+            </div>
+          } @else {
+            <p class="muted muted--block">
+              Personne en charge du recrutement n'est renseignée. Ajoute-la via
+              <em>Modifier</em> pour personnaliser la relance.
+            </p>
+          }
+        </div>
+      </div>
+
+      <div class="fiche__col">
+        <!-- ============ L'OFFRE ============ -->
+        <div class="panel">
+          <h3>{{ c.origine === 'spontanee' ? 'Ma candidature' : 'L\'offre' }}</h3>
+          <dl>
+            <div><dt>Poste</dt><dd>{{ c.poste || '—' }}</dd></div>
+            @if (c.origine !== 'spontanee') {
+              <div><dt>Lieu</dt><dd>{{ c.lieu || '—' }}</dd></div>
+              <div><dt>Type</dt><dd>{{ c.type || '—' }}</dd></div>
+            }
+            <div>
+              <dt>Ajoutée le</dt>
+              <dd>{{ fmt(c.dateAjout) || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Candidature envoyée</dt>
+              <dd>{{ fmt(c.dateDepot) || '—' }}</dd>
+            </div>
+            @if (c.origine !== 'spontanee') {
+              <div>
+                <dt>Date limite offre</dt>
+                <dd>{{ fmt(c.dateLimit) || '—' }}</dd>
+              </div>
+            }
+            <div>
+              <dt>Dernière relance</dt>
+              <dd>{{ fmt(c.dateRelance) || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Relances</dt>
+              <dd>{{ c.nbRelances || 0 }}</dd>
+            </div>
+            @if (c.lien) {
+              <div>
+                <dt>Lien</dt>
+                <dd>
+                  <a [href]="c.lien" target="_blank" rel="noopener">Ouvrir l'offre ↗</a>
+                </dd>
+              </div>
+            }
+            @if (c.mailObjet || c.mailExpediteur) {
+              <div>
+                <dt>Mail source</dt>
+                <dd>
+                  @if (c.mailObjet) {
+                    <div>{{ c.mailObjet }}</div>
+                  }
+                  @if (c.mailExpediteur) {
+                    <div class="fiche__mail-from">{{ c.mailExpediteur }}</div>
+                  }
+                </dd>
+              </div>
+            }
+            @if (c.notes) {
+              <div><dt>Notes</dt><dd class="fiche__notes">{{ c.notes }}</dd></div>
+            }
+          </dl>
+        </div>
+
+        <!-- ============ SUIVI ============ -->
+        <div class="panel">
+          <h3>Suivi</h3>
+          <div class="fiche__statut">
+            <label for="fiche-statut">Statut</label>
+            <select id="fiche-statut" [value]="c.statut" (change)="onStatutChange($event)">
+              @for (s of statuts; track s) {
+                <option [value]="s">{{ statutLabels[s] }}</option>
+              }
+            </select>
+            <small class="fiche__statut-hint">
+              Nouveau · Postulé · Refusé · Archivé (offre fermée)
+            </small>
+          </div>
+
+          <div class="indicateurs">
+            @if (relanceDue()) {
+              <span
+                class="indicateur indicateur--relance"
+                title="Cliquer pour préparer le brouillon de relance"
+                (click)="relanceRef.open()"
+              >
+                🔔 Relance à faire
+              </span>
+            } @else if (joursAvantRelance() !== null) {
+              <span class="indicateur">
+                🔔 Prochaine relance dans {{ joursAvantRelance() }}j
+              </span>
+            } @else {
+              <span class="indicateur">Aucune relance envoyée</span>
+            }
+
+            @if (c.nbRelances > 0) {
+              <span class="indicateur indicateur--ok">
+                ✓ {{ c.nbRelances }} relance(s) envoyée(s)
+              </span>
+            }
+          </div>
+
+          @if (prochaineRelance()) {
+            <p class="fiche__relance-info">
+              Relances hebdomadaires : la prochaine est prévue le
+              {{ prochaineRelance() }}.
+            </p>
+          }
+        </div>
+
+        <!-- ============ MOI ============ -->
+        <div class="panel">
+          <h3>Moi (signature de la relance)</h3>
+          <app-completion-bar [completion]="completionProfilCandidat()" />
+
+          <dl class="fiche__profil">
+            <div>
+              <dt>Nom</dt>
+              <dd>{{ c.candidat.prenom }} {{ c.candidat.nom }}</dd>
+            </div>
+            <div><dt>Email</dt><dd>{{ c.candidat.email || '—' }}</dd></div>
+            <div><dt>Téléphone</dt><dd>{{ c.candidat.telephone || '—' }}</dd></div>
+            <div><dt>Ville</dt><dd>{{ c.candidat.ville || '—' }}</dd></div>
+            @if (c.candidat.linkedin) {
+              <div>
+                <dt>LinkedIn</dt>
+                <dd><a [href]="c.candidat.linkedin" target="_blank" rel="noopener">Profil ↗</a></dd>
+              </div>
+            }
+            @if (c.candidat.cv) {
+              <div>
+                <dt>CV</dt>
+                <dd><a [href]="c.candidat.cv" target="_blank" rel="noopener">CV ↗</a></dd>
+              </div>
+            }
+          </dl>
+
+          <button type="button" class="btn btn--ghost fiche__sync" (click)="syncProfil()">
+            Mettre à jour depuis mon profil
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <app-candidature-form #formRef [existing]="c" (saved)="onSaved($event)" />
+  <app-relance-form
+    #relanceRef
+    [candidature]="c"
+    (relanceEnvoyee)="onRelanceEnvoyee($event)"
+  />
+}

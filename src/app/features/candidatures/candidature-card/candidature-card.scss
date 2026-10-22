@@ -1,0 +1,149 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  height: 100%;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md);
+  }
+
+  &.is-archived {
+    opacity: 0.65;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  &__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  &__avatar {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary), #7c3aed);
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  &__poste {
+    margin: 0;
+    font-size: 1.02rem;
+    line-height: 1.3;
+  }
+
+  &__entreprise {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+  }
+
+  &__dates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+    padding-top: 0.55rem;
+    border-top: 1px dashed var(--border);
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.15rem;
+  }
+
+  &__foot {
+    margin-top: auto;
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__link {
+    margin-left: auto;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    color: var(--primary);
+    font-weight: 500;
+  }
+}
+
+.chip {
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--r-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--surface-alt);
+  color: var(--text-soft);
+
+  &[data-statut='nouveau'] {
+    background: var(--primary-soft);
+    color: var(--primary-strong);
+  }
+
+  &[data-statut='postule'] {
+    background: #dcfce7;
+    color: #047857;
+  }
+
+  &[data-statut='refuse'] {
+    background: #ffe4e6;
+    color: #be123c;
+  }
+
+  &[data-statut='archive'] {
+    background: #e2e8f0;
+    color: #475569;
+  }
+}
+
+.tag {
+  padding: 0.16rem 0.55rem;
+  border-radius: 6px;
+  background: var(--surface-alt);
+  font-size: 0.75rem;
+  color: var(--text-soft);
+
+  &--warn {
+    background: var(--warn-soft);
+    color: #a35c06;
+    font-weight: 600;
+  }
+
+  &--relance {
+    background: #ffe4e6;
+    color: #be123c;
+    font-weight: 700;
+  }
+
+  &--mail {
+    background: #dcfce7;
+    color: #047857;
+  }
+}

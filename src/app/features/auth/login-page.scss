@@ -1,0 +1,353 @@
+.auth {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  min-height: 100vh;
+
+  /* ============ Panneau de marque ============ */
+  &__aside {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.4rem;
+    padding: 3rem clamp(2rem, 5vw, 4.5rem);
+    overflow: hidden;
+    background: var(--gradient-primary);
+    color: #fff;
+
+    /* halos décoratifs */
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    &::before {
+      top: -18%;
+      right: -22%;
+      width: 480px;
+      height: 480px;
+      background: radial-gradient(circle, rgb(255 255 255 / 22%) 0%, transparent 68%);
+    }
+
+    &::after {
+      bottom: -26%;
+      left: -14%;
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(circle, rgb(236 72 153 / 28%) 0%, transparent 70%);
+    }
+
+    > * {
+      position: relative;
+      z-index: 1;
+    }
+  }
+
+  &__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+
+  &__logo {
+    display: inline-grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: rgb(255 255 255 / 18%);
+    border: 1px solid rgb(255 255 255 / 28%);
+    box-shadow: 0 8px 20px rgb(15 23 42 / 18%);
+    font-weight: 800;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(6px);
+  }
+
+  &__brandname {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  &__headline {
+    margin: 0;
+    font-size: clamp(1.9rem, 3.4vw, 2.7rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+  }
+
+  &__headline-accent {
+    background: linear-gradient(90deg, #fde68a, #fbcfe8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  &__pitch {
+    margin: 0;
+    max-width: 46ch;
+    font-size: 1rem;
+    color: rgb(255 255 255 / 82%);
+  }
+
+  &__features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.6rem 0.85rem;
+      border-radius: var(--r-md);
+      background: rgb(255 255 255 / 10%);
+      border: 1px solid rgb(255 255 255 / 16%);
+      font-size: 0.9rem;
+      font-weight: 500;
+      backdrop-filter: blur(6px);
+    }
+  }
+
+  &__feature-ico {
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 9px;
+    background: rgb(255 255 255 / 16%);
+    font-size: 0.85rem;
+  }
+
+  /* ============ Panneau du formulaire ============ */
+  &__panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+    background: var(--bg);
+  }
+
+  &__card {
+    width: min(430px, 100%);
+    padding: 1.6rem 1.7rem 1.4rem;
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    background: var(--gradient-surface);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Onglets Connexion / Inscription */
+  &__tabs {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25rem;
+    padding: 0.3rem;
+    margin-bottom: 1.4rem;
+    border-radius: var(--r-md);
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+  }
+
+  &__tab {
+    position: relative;
+    z-index: 1;
+    padding: 0.5rem 0.4rem;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      color 0.2s ease,
+      background 0.2s ease;
+
+    &:hover:not(.is-active) {
+      color: var(--text-soft);
+    }
+
+    &.is-active {
+      color: var(--primary-strong);
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+
+  &__head {
+    text-align: center;
+    margin-bottom: 1.35rem;
+
+    h1 {
+      margin: 0 0 0.3rem;
+      font-size: 1.4rem;
+      font-weight: 800;
+    }
+
+    p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.87rem;
+    }
+  }
+
+  &__submit {
+    margin-top: 0.85rem;
+  }
+
+  &__spinner {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgb(255 255 255 / 45%);
+    border-top-color: #fff;
+    animation: auth-spin 0.7s linear infinite;
+  }
+
+  /* Champ mot de passe + œil */
+  &__pwd {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    input {
+      padding-right: 2.8rem;
+    }
+  }
+
+  &__pwd-toggle {
+    position: absolute;
+    right: 0.35rem;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
+
+    &:hover {
+      background: var(--surface-alt);
+      color: var(--primary-strong);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: var(--ring);
+    }
+  }
+
+  /* Alertes */
+  &__alerte {
+    margin: 0 0 0.9rem;
+    padding: 0.65rem 0.8rem;
+    border-radius: var(--r-sm);
+    border: 1px solid transparent;
+    font-size: 0.82rem;
+    line-height: 1.5;
+
+    &--error {
+      background: var(--danger-soft);
+      border-color: #f6c9c9;
+      color: #a11b1b;
+    }
+
+    &--ok {
+      background: var(--success-soft);
+      border-color: #bbf7d0;
+      color: #047857;
+    }
+
+    &--warn {
+      background: var(--warn-soft);
+      border-color: #fde3a7;
+      color: #a35c06;
+    }
+
+    code {
+      font-size: 0.78rem;
+      padding: 0.05rem 0.25rem;
+      border-radius: 4px;
+      background: rgb(0 0 0 / 5%);
+    }
+  }
+
+  /* Pied de formulaire */
+  &__foot {
+    margin-top: 1.3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+
+  &__foot-text {
+    margin: 0.3rem 0 0;
+    font-size: 0.84rem;
+    color: var(--text-muted);
+  }
+
+  &__link {
+    border: 0;
+    background: none;
+    padding: 0;
+    color: var(--primary);
+    font: inherit;
+    font-size: 0.84rem;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    &--strong {
+      font-weight: 700;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+@keyframes auth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- Responsive ---------------------------------------------------------- */
+@media (max-width: 900px) {
+  .auth {
+    grid-template-columns: 1fr;
+
+    &__aside {
+      padding: 2.25rem 1.5rem;
+      gap: 1rem;
+
+      &__pitch,
+      &__features {
+        display: none;
+      }
+    }
+  }
+}

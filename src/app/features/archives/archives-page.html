@@ -1,0 +1,74 @@
+<section class="archives">
+  <header class="archives__head">
+    <div>
+      <h2>Archivées</h2>
+      <p class="archives__subtitle">
+        {{ archivees().length }} candidature(s) archivée(s) — les offres dont la
+        candidature est terminée ou l'offre est fermée.
+      </p>
+    </div>
+
+    <a routerLink="/candidatures" class="btn btn--ghost">← Retour aux candidatures</a>
+  </header>
+
+  @if (chargement()) {
+    <div class="empty">
+      <p>⏳ Chargement…</p>
+    </div>
+  } @else if (archivees().length === 0) {
+    <div class="empty">
+      <p>📦 Aucune candidature archivée.</p>
+      <p class="empty__hint">
+        Change le statut d'une candidature en <em>Archivé</em> pour la retrouver ici.
+      </p>
+    </div>
+  } @else {
+    <ul class="list">
+      @for (c of archivees(); track c.id) {
+        <li>
+          <span class="list__avatar">{{ initiales(c.entreprise.nom) }}</span>
+
+          <div class="list__main">
+            <strong>{{ c.poste || 'Candidature spontanée' }}</strong>
+            <span>{{ c.entreprise.nom }}</span>
+          </div>
+
+          <div class="list__meta">
+            @if (c.lieu) {
+              <span class="tag">📍 {{ c.lieu }}</span>
+            }
+            @if (c.dateDepot) {
+              <span class="tag">📩 Envoyée le {{ fmt(c.dateDepot) }}</span>
+            }
+            @if (c.entreprise.ville) {
+              <span class="tag">🏢 {{ c.entreprise.ville }}</span>
+            }
+            <span class="tag tag--archive">Archivé</span>
+          </div>
+
+          <div class="list__actions">
+            <button
+              type="button"
+              class="btn btn--ghost btn--small"
+              title="Remettre dans le circuit"
+              (click)="restaurer(c)"
+            >
+              ↩ Remettre
+            </button>
+            <a class="btn btn--ghost btn--small" [routerLink]="['/candidatures', c.id]">
+              Voir
+            </a>
+            <button
+              type="button"
+              class="btn btn--danger btn--small"
+              title="Supprimer définitivement"
+              (click)="supprimer(c)"
+            >
+              🗑
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>

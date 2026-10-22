@@ -1,0 +1,131 @@
+<section class="candidatures">
+  <header class="candidatures__header">
+    <div>
+      <h2>Mes candidatures</h2>
+      <p class="candidatures__subtitle">
+        {{ total() }} candidature(s)
+        @if (nbRelances() > 0) {
+          · <span class="candidatures__relance">{{ nbRelances() }} relance(s) à faire</span>
+        }
+      </p>
+    </div>
+
+    <div class="candidatures__actions">
+      <button
+        type="button"
+        class="btn btn--ghost"
+        title="Réafficher la candidature d'exemple"
+        (click)="chargerExemple()"
+      >
+        💡 Exemple
+      </button>
+      <button type="button" class="btn btn--primary" (click)="formOffre.open()">
+        + Ajouter une offre
+      </button>
+    </div>
+  </header>
+
+  <div class="candidatures__filters">
+    <input
+      type="search"
+      placeholder="Rechercher (entreprise, poste, lieu)…"
+      [value]="filtreTexte()"
+      (input)="onTexteChange($event)"
+    />
+
+    <select [value]="filtreStatut()" (change)="onStatutChange($event)">
+      <option value="tous">Tous les statuts</option>
+      @for (s of statuts; track s) {
+        <option [value]="s">{{ statutLabels[s] }}</option>
+      }
+    </select>
+
+    <button
+      type="button"
+      class="btn btn--ghost"
+      [class.is-active]="filtreRelance()"
+      (click)="toggleRelance()"
+    >
+      🔔 Relances ({{ nbRelances() }})
+    </button>
+  </div>
+
+  @if (chargement()) {
+    <div class="empty">
+      <p>⏳ Chargement de tes candidatures depuis Supabase…</p>
+    </div>
+  } @else {
+    <!-- ============ OFFRES ============ -->
+    <section class="section section--offres">
+    <header class="section__head">
+      <h3>Offres</h3>
+      <span class="section__count">
+        {{ offres().length }} candidature(s)
+        @if (nbRelancesOffres() > 0) {
+          · {{ nbRelancesOffres() }} relance(s)
+        }
+      </span>
+    </header>
+
+    @if (offres().length === 0) {
+      <div class="empty">
+        <p>Aucune candidature pour l'instant.</p>
+        <button type="button" class="btn btn--primary" (click)="formOffre.open()">
+          Ajouter la première
+        </button>
+      </div>
+    } @else {
+      <div class="cards">
+        @for (c of offres(); track c.id) {
+          <app-candidature-card [candidature]="c" />
+        }
+      </div>
+    }
+  </section>
+
+  <!-- ============ SPONTANÉES ============ -->
+  <section class="section section--spontanee">
+    <header class="section__head">
+      <h3>Candidatures spontanées</h3>
+      <span class="section__count">
+        {{ spontanees().length }} candidature(s)
+        @if (nbRelancesSpontanees() > 0) {
+          · {{ nbRelancesSpontanees() }} relance(s)
+        }
+      </span>
+      <button
+        type="button"
+        class="btn btn--primary btn--small"
+        (click)="formSpontanee.open()"
+      >
+        + Candidature spontanée
+      </button>
+    </header>
+
+    @if (spontanees().length === 0) {
+      <div class="empty">
+        <p>
+          Aucune candidature spontanée. Ajoute une entreprise avec son email de
+          recrutement, son téléphone et son LinkedIn.
+        </p>
+        <button type="button" class="btn btn--primary" (click)="formSpontanee.open()">
+          + Candidature spontanée
+        </button>
+      </div>
+    } @else {
+      <div class="cards">
+        @for (c of spontanees(); track c.id) {
+          <app-candidature-card [candidature]="c" />
+        }
+      </div>
+    }
+  </section>
+  }
+</section>
+
+<app-candidature-form #formOffre origine="offre" (saved)="onSaved($event)" />
+<app-candidature-form
+  #formSpontanee
+  origine="spontanee"
+  (saved)="onSaved($event)"
+/>

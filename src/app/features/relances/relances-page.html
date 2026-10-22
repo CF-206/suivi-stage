@@ -1,0 +1,107 @@
+<section class="relances">
+  <header class="relances__head">
+    <div>
+      <h2>Relances</h2>
+      <p class="relances__subtitle">
+        {{ dues().length }} relance(s) à faire ·
+        {{ aVenir().length }} candidature(s) en cours de suivi
+      </p>
+    </div>
+
+    @if (notifications.permission() !== 'granted') {
+      <button type="button" class="btn btn--primary" (click)="activerNotifications()">
+        🔔 Activer les notifications
+      </button>
+    } @else {
+      <span class="relances__ok">✓ Notifications activées</span>
+    }
+  </header>
+
+  @if (!notifications.supporte) {
+    <p class="alerte alerte--warn">
+      Ton navigateur ne supporte pas les notifications.
+    </p>
+  } @else if (notifications.permission() === 'denied') {
+    <p class="alerte alerte--warn">
+      Les notifications sont bloquées pour ce site. Autorise-les dans les
+      réglages du navigateur (icône 🔒 à gauche de la barre d'adresse), puis
+      recharge la page.
+    </p>
+  } @else {
+    <p class="alerte">
+      L'app te prévient dès qu'une relance est à faire, et une notification push
+      arrive même si tu as l'application fermée (une seule fois par candidature).
+    </p>
+  }
+
+  <h3 class="relances__section-title">À faire maintenant</h3>
+
+  @if (chargement()) {
+    <div class="empty">
+      <p>⏳ Chargement…</p>
+    </div>
+  } @else if (dues().length === 0) {
+    <div class="empty">
+      <p>✅ Aucune relance à faire pour le moment.</p>
+    </div>
+  } @else {
+    <ul class="list">
+      @for (c of dues(); track c.id) {
+        <li>
+          <span class="list__avatar">{{ c.entreprise.nom.slice(0, 2).toUpperCase() }}</span>
+
+          <div class="list__main">
+            <strong>{{ c.entreprise.nom }}</strong>
+            <span>{{ c.poste || 'Candidature spontanée' }}</span>
+          </div>
+
+          <div class="list__meta">
+            @if (jours(c) !== null) {
+              <span class="tag tag--late">{{ jours(c) }}j d'attente</span>
+            }
+            @if (c.entreprise.email) {
+              <span class="tag tag--mail">✉️ {{
+                c.entreprise.email
+              }}</span>
+            } @else {
+              <span class="tag tag--warn">⚠️ Email manquant</span>
+            }
+          </div>
+
+          <a class="btn btn--primary btn--small" [routerLink]="['/candidatures', c.id]">
+            Préparer la relance
+          </a>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (!chargement() && aVenir().length > 0) {
+    <h3 class="relances__section-title">Suites en cours</h3>
+
+    <ul class="list list--light">
+      @for (c of aVenir(); track c.id) {
+        <li>
+          <span class="list__avatar list__avatar--light">{{
+            c.entreprise.nom.slice(0, 2).toUpperCase()
+          }}</span>
+
+          <div class="list__main">
+            <strong>{{ c.entreprise.nom }}</strong>
+            <span>{{ c.poste || 'Candidature spontanée' }}</span>
+          </div>
+
+          <div class="list__meta">
+            <span class="tag">
+              Prochaine relance le {{ prochaine(c) }}
+            </span>
+          </div>
+
+          <a class="btn btn--ghost btn--small" [routerLink]="['/candidatures', c.id]">
+            Voir
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</section>

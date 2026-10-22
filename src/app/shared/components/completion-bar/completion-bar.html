@@ -1,0 +1,23 @@
+<div class="completion" [class.completion--compact]="compact()">
+  <div class="completion__head">
+    <strong>{{ completion().remplis }}/{{ completion().total }}</strong>
+    <span>{{ libelle() }}</span>
+    <span class="completion__pct">{{ completion().pourcentage }}%</span>
+  </div>
+
+  <div class="completion__track">
+    <div
+      class="completion__fill"
+      [attr.data-niveau]="niveau()"
+      [style.width.%]="completion().pourcentage"
+    ></div>
+  </div>
+
+  @if (!compact() && completion().manquants.length > 0) {
+    <ul class="completion__missing">
+      @for (m of completion().manquants; track m.key) {
+        <li>{{ m.label }}</li>
+      }
+    </ul>
+  }
+</div>

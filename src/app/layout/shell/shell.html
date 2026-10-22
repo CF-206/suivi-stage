@@ -1,0 +1,98 @@
+<div class="shell">
+  <header class="shell__topbar">
+    <a class="shell__brand" routerLink="/candidatures">
+      <span class="shell__logo">SS</span>
+      <span class="shell__name">Suivi Stage</span>
+    </a>
+
+    <nav class="shell__nav">
+      <a
+        class="shell__tab"
+        routerLink="/relances"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+        title="Relances à faire"
+      >
+        <span class="shell__tab-icone">🔔</span>
+        <span class="shell__tab-label">Relances</span>
+        @if (nbRelances() > 0) {
+          <span class="shell__badge">{{ nbRelances() }}</span>
+        }
+      </a>
+
+      <a
+        class="shell__tab"
+        routerLink="/archives"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+        title="Candidatures archivées"
+      >
+        <span class="shell__tab-icone">📦</span>
+        <span class="shell__tab-label">Archivée</span>
+        @if (nbArchivees() > 0) {
+          <span class="shell__badge shell__badge--grey">{{ nbArchivees() }}</span>
+        }
+      </a>
+
+      <a
+        class="shell__tab"
+        routerLink="/profil"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+        title="Mes informations"
+      >
+        <span class="shell__tab-icone">👤</span>
+        <span class="shell__tab-label">Mes infos</span>
+      </a>
+    </nav>
+
+    <div class="shell__user">
+      @if (auth.connecte()) {
+        <button type="button" class="btn btn--ghost btn--small" (click)="deconnexion()">
+          Déconnexion
+        </button>
+      } @else {
+        <span class="shell__email" title="Mode local : les données restent dans ce navigateur">
+          💾 Mode local
+        </span>
+      }
+    </div>
+  </header>
+
+  @if (erreur(); as message) {
+    <p class="shell__erreur">{{ message }}</p>
+  } @else if (enAttente()) {
+    <p class="shell__erreur">
+      ⏳ Hors-ligne : tes modifications sont enregistrées et seront envoyées à Supabase dès que le
+      réseau reviendra.
+    </p>
+  }
+
+  @if (proposerNotifications()) {
+    <div class="shell__banniere">
+      <span class="shell__banniere-ico">🔔</span>
+      <div class="shell__banniere-texte">
+        <strong>Active les notifications</strong>
+        <span>
+          L'application te préviens dès qu'une relance est à faire, sans que tu aies à surveiller
+          l'écran.
+        </span>
+      </div>
+      <button type="button" class="btn btn--primary btn--small" (click)="activerNotifications()">
+        Activer
+      </button>
+      <button
+        type="button"
+        class="shell__banniere-close"
+        title="Plus tard"
+        (click)="masquerBanniere()"
+      >
+        ✕
+      </button>
+    </div>
+  }
+
+  <main class="shell__content">
+    <router-outlet />
+  </main>
+</div>
