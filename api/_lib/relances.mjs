@@ -110,6 +110,54 @@ function escapeHtml(value) {
     .replace(/"/g, '&quot;');
 }
 
+/**
+ * Version HTML du mail de relance envoyé AU RECRUTEUR.
+ * @param {{objet: string, corps: string, entreprise: object, candidat: object}} parts
+ */
+export function construireHtmlRelance(parts) {
+  const paragraphs = String(parts.corps ?? '')
+    .split(/\n{2,}/)
+    .map((p) => `<p style="margin:0 0 14px;">${escapeHtml(p).replace(/\n/g, '<br>')}</p>`)
+    .join('');
+
+  const candidat = parts.candidat ?? {};
+  const contact = [];
+  if (candidat.email) contact.push(candidat.email);
+  if (candidat.telephone) contact.push(candidat.telephone);
+
+  return `<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHtml(parts.objet)}</title>
+</head>
+<body style="margin:0;padding:24px;background:#f4f5fb;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#171a2b;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;border:1px solid #e4e7f2;">
+    <tr>
+      <td style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:20px 24px;">
+        <div style="font-size:15px;font-weight:800;color:#ffffff;">Suivi Stage</div>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:24px;">
+        <h1 style="margin:0 0 18px;font-size:18px;line-height:1.4;">${escapeHtml(parts.objet)}</h1>
+        <div style="font-size:15px;line-height:1.65;color:#171a2b;">${paragraphs}</div>
+        ${
+          contact.length > 0
+            ? `<div style="margin-top:22px;padding-top:16px;border-top:1px solid #e4e7f2;font-size:13px;color:#767d95;">
+                 ${escapeHtml([candidat.prenom, candidat.nom].filter(Boolean).join(' '))}
+                 ${contact.map((c) => `&nbsp;·&nbsp;${escapeHtml(c)}`).join('')}
+               </div>`
+            : ''
+        }
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
 /** Construit le sujet du mail. */
 export function construireSujet(relances) {
   if (relances.length === 1) {

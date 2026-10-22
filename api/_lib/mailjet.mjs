@@ -9,8 +9,8 @@ const API_URL = 'https://api.mailjet.com/v3.1/send';
 
 /**
  * Envoie un email via Mailjet.
- * @param {{to: string, toName?: string, subject: string, text: string, html: string}} message
- * @param {{apiKey: string, apiSecret: string, fromEmail: string, fromName?: string}} config
+ * @param {{to: string, toName?: string, subject: string, text: string, html: string, replyTo?: string}} message
+ * @param {{apiKey: string, apiSecret: string, fromEmail: string, fromName?: string, replyTo?: string}} config
  * @returns {Promise<{ok: boolean, status: number, body?: unknown, error?: string}>}
  */
 export async function envoyerEmail(message, config) {
@@ -25,6 +25,8 @@ export async function envoyerEmail(message, config) {
 
   const basic = Buffer.from(`${apiKey}:${apiSecret}`).toString('base64');
 
+  const replyTo = message.replyTo ?? config.replyTo;
+
   const payload = {
     Messages: [
       {
@@ -33,6 +35,7 @@ export async function envoyerEmail(message, config) {
         Subject: message.subject,
         TextPart: message.text,
         HTMLPart: message.html,
+        ...(replyTo ? { ReplyTo: { Email: replyTo } } : {}),
       },
     ],
   };

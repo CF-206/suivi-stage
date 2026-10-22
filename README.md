@@ -193,6 +193,43 @@ trouvées, emails envoyés).
 
 ---
 
+## 2.7 Envoyer la relance directement par email
+
+Dans la fiche d'une candidature, le bouton **« 🔔 Relancer »** ouvre la modale
+de relance (le texte d'aide et le brouillon pré-rempli restent inchangés).
+Elle propose 4 actions :
+
+| Action | Effet |
+|---|---|
+| **Copier le message** | met le brouillon dans le presse-papiers |
+| **Ouvrir dans Outlook** | ouvre Outlook avec un `mailto:` pré-rempli |
+| **📧 Envoyer le mail** | **envoie vraiment l'email** au recruteur |
+| **Marquer la relance envoyée** | pour un envoi fait manuellement |
+
+**Qui envoie, à qui ?**
+
+- **expéditeur** : l'adresse email du **compte connecté** ;
+- **destinataire** : l'adresse de contact de la candidature (champ
+  « Destinataire », modifiable) ;
+- **contenu** : le texte affiché dans la modale (donc ta version si tu la
+  modifies) ;
+- `Reply-To` : ton adresse, pour que la réponse du recruteur arrive chez toi.
+
+Si ton adresse n'est pas validée comme expéditeur chez Mailjet, le mail part
+depuis `MAILJET_FROM_EMAIL` mais le `Reply-To` reste ton adresse.
+
+**Sécurité** : l'endpoint `/api/envoyer-relance` exige le jeton de session
+Supabase de l'utilisateur connecté ; l'email du compte est lu côté serveur
+(aucun email n'est accepté depuis le navigateur).
+
+Après un envoi réussi, la relance est marquée comme envoyée (`dateRelance`,
+`nbRelances`) → le cycle de 7 jours repart.
+
+> En local (`ng serve`), l'endpoint n'existe pas : le bouton affiche un
+> message explicite. L'envoi direct est disponible sur la version en ligne.
+
+---
+
 ## 3. Où sont stockées les données ?
 
 | Situation | Stockage |

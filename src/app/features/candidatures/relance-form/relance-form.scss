@@ -44,6 +44,28 @@
     color: var(--text-muted);
   }
 
+  /* Retour de l'envoi d'email */
+  &__retour {
+    margin: 0 0 1rem;
+    padding: 0.65rem 0.8rem;
+    border-radius: var(--r-sm);
+    border: 1px solid transparent;
+    font-size: 0.83rem;
+    font-weight: 500;
+
+    &.is-ok {
+      background: var(--success-soft);
+      border-color: #bbf7d0;
+      color: #047857;
+    }
+
+    &.is-ko {
+      background: var(--danger-soft);
+      border-color: #f6c9c9;
+      color: #a11b1b;
+    }
+  }
+
   &__foot {
     display: flex;
     justify-content: flex-end;
