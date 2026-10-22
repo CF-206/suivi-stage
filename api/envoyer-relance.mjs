@@ -15,6 +15,7 @@
  */
 
 import { envoyerEmail } from './_lib/mailjet.mjs';
+import { choisirIdentifiants } from './_lib/mailjet-config.mjs';
 import { construireHtmlRelance } from './_lib/relances.mjs';
 
 /** Nettoie un en-tête (empêche l'injection d'en-têtes via \r\n). */
@@ -67,8 +68,16 @@ export default async function handler(req, res) {
 
     const emailExpediteur = utilisateur.email;
 
-    // --- Configuration Mailjet --------------------------------------------
-    if (!process.env.MAILJET_API_KEY || !process.env.MAILJET_API_SECRET) {
+    // --- Identifiants Mailjet ----------------------------------------------
+    // Compte personnel de l'utilisateur s'il en a un, sinon celui de l'app.
+    const identifiants = await choisirIdentifiants(
+      url,
+      process.env.SUPABASE_ANON_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
+      jeton,
+      utilisateur.id,
+    );
+
+    if (!identifiants.apiKey || !identifiants.apiSecret) {
       return repondre(500, {
         error: "L'envoi d'email n'est pas configuré (variables Mailjet manquantes).",
       });
@@ -107,34 +116,41 @@ export default async function handler(req, res) {
       candidat: payload.candidat ?? {},
     });
 
-    const base = {
-      apiKey: process.env.MAILJET_API_KEY,
-      apiSecret: process.env.MAILJET_API_SECRET,
-      fromEmail: emailExpediteur,
-      fromName: [utilisateur.user_metadata?.prenom, utilisateur.user_metadata?.nom]
+    const nomExpediteur =
+      identifiants.fromName ||
+      [utilisateur.user_metadata?.prenom, utilisateur.user_metadata?.nom]
         .filter(Boolean)
-        .join(' ') || 'Suivi Stage',
+        .join(' ') ||
+      'Suivi Stage';
+
+    // L'expéditeur par défaut est l'adresse du compte connecté ; si elle n'est
+    // pas validée chez Mailjet, on repart depuis l'adresse de l'application.
+    const base = {
+      apiKey: identifiants.apiKey,
+      apiSecret: identifiants.apiSecret,
+      fromEmail: emailExpediteur,
+      fromName: nomExpediteur,
+      replyTo: emailExpediteur,
     };
 
     let reponse = await envoyerEmail(
       { to: destinataire, toName: '', subject: objet, text: corps, html },
-      { ...base, replyTo: emailExpediteur },
+      base,
     );
 
     let expediteurUtilise = emailExpediteur;
 
     // Repli : l'adresse de l'utilisateur n'est pas validée chez Mailjet.
-    if (!reponse.ok && reponse.status === 400 && process.env.MAILJET_FROM_EMAIL) {
+    if (!reponse.ok && reponse.status === 400 && identifiants.fromEmail) {
       reponse = await envoyerEmail(
         { to: destinataire, toName: '', subject: objet, text: corps, html },
         {
           ...base,
-          fromEmail: process.env.MAILJET_FROM_EMAIL,
-          fromName: process.env.MAILJET_FROM_NAME || 'Suivi Stage',
-          replyTo: emailExpediteur,
+          fromEmail: identifiants.fromEmail,
+          fromName: identifiants.fromName || 'Suivi Stage',
         },
       );
-      expediteurUtilise = process.env.MAILJET_FROM_EMAIL;
+      expediteurUtilise = identifiants.fromEmail;
     }
 
     if (!reponse.ok) {

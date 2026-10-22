@@ -51,6 +51,44 @@ create table if not exists public.relances_envoyees (
 
 alter table public.relances_envoyees enable row level security;
 
+-- 2c. Compte Mailjet personnel (optionnel) ---------------------------------
+-- Chaque utilisateur peut connecter SON compte Mailjet : ses relances partent
+-- alors depuis sa propre adresse, avec son propre quota, sans passer par le
+-- compte de l'application.
+-- La clé secrète n'est lisible que par son propriétaire (RLS) et par le
+-- serveur (clé service_role).
+create table if not exists public.mailjet_credentials (
+  user_id    uuid primary key references auth.users (id) on delete cascade,
+  api_key    text not null,
+  api_secret text not null,
+  from_email text not null,
+  from_name  text,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.mailjet_credentials enable row level security;
+
+drop policy if exists "mailjet: lecture" on public.mailjet_credentials;
+create policy "mailjet: lecture"
+  on public.mailjet_credentials for select
+  using (auth.uid() = user_id);
+
+drop policy if exists "mailjet: insertion" on public.mailjet_credentials;
+create policy "mailjet: insertion"
+  on public.mailjet_credentials for insert
+  with check (auth.uid() = user_id);
+
+drop policy if exists "mailjet: modification" on public.mailjet_credentials;
+create policy "mailjet: modification"
+  on public.mailjet_credentials for update
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+drop policy if exists "mailjet: suppression" on public.mailjet_credentials;
+create policy "mailjet: suppression"
+  on public.mailjet_credentials for delete
+  using (auth.uid() = user_id);
+
 -- 3. Index utiles -------------------------------------------------------------
 create index if not exists candidatures_user_id_idx
   on public.candidatures (user_id);

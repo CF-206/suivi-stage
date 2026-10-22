@@ -228,6 +228,35 @@ Après un envoi réussi, la relance est marquée comme envoyée (`dateRelance`,
 > En local (`ng serve`), l'endpoint n'existe pas : le bouton affiche un
 > message explicite. L'envoi direct est disponible sur la version en ligne.
 
+### Compte Mailjet personnel (optionnel)
+
+Par défaut, l'application utilise **son propre** compte Mailjet pour tous les
+utilisateurs. Chacun peut brancher **le sien** :
+
+- **à l'inscription** : un bloc optionnel apparaît sous le formulaire
+  (« Connecter mon compte ») ;
+- **plus tard** : dans « Mes infos », section « 📧 Envoi d'emails (Mailjet) ».
+
+Il faut 3 informations (Mailjet → *Account Settings → API Keys*) :
+
+| Champ | Où le trouver |
+|---|---|
+| Clé API | *API Key* (publique) |
+| Clé secrète | *Secret Key* (privée) |
+| Adresse expéditeur | doit être **validée** dans *Senders & Domains* |
+
+Un bouton **« Envoyer un mail de test »** vérifie immédiatement que les
+identifiants sont bons.
+
+**Ce que ça change :** les mails partent depuis **ton** compte Mailjet, avec
+**ton** quota, et ton adresse en expéditeur — le compte de l'application n'est
+plus utilisé.
+
+**Sécurité :** les identifiants sont stockés dans la table
+`mailjet_credentials`, avec une RLS stricte : un utilisateur ne peut lire ni
+modifier que **sa** ligne (vérifié par test automatisé). Ils ne sont jamais
+envoyés dans le bundle du navigateur.
+
 ---
 
 ## 3. Où sont stockées les données ?

@@ -1,0 +1,98 @@
+<div class="mailjet">
+  <header class="mailjet__head">
+    <div>
+      <h3>📧 Envoi d'emails (Mailjet)</h3>
+      @if (mailjet.configure()) {
+        <p class="mailjet__ok">
+          ✓ Compte Mailjet connecté — tes relances partent depuis
+          <strong>{{ mailjet.config().fromEmail }}</strong>.
+        </p>
+      } @else {
+        <p>
+          Optionnel : connecte <strong>ton propre compte Mailjet</strong> pour envoyer tes
+          relances depuis ta adresse, avec ton quota. Sans compte personnel, l'application
+          utilise son propre compte Mailjet.
+        </p>
+      }
+    </div>
+
+    @if (mailjet.configure()) {
+      <button type="button" class="btn btn--ghost btn--small" (click)="ouvert.set(!ouvert())">
+        {{ ouvert() ? 'Fermer' : 'Modifier' }}
+      </button>
+    } @else {
+      <button type="button" class="btn btn--soft btn--small" (click)="ouvert.set(!ouvert())">
+        {{ ouvert() ? 'Annuler' : 'Connecter mon compte' }}
+      </button>
+    }
+  </header>
+
+  @if (ouvert()) {
+    <div class="mailjet__form">
+      <div class="mailjet__grid">
+        <div class="field">
+          <label for="mj-api-key">Clé API (publique) <em>*</em></label>
+          <input id="mj-api-key" type="text" formControlName="apiKey" placeholder="xxxxxxxx" />
+        </div>
+
+        <div class="field">
+          <label for="mj-api-secret">Clé secrète <em>*</em></label>
+          <input id="mj-api-secret" type="password" formControlName="apiSecret" placeholder="xxxxxxxx" />
+        </div>
+
+        <div class="field">
+          <label for="mj-from-email">Adresse expéditeur <em>*</em></label>
+          <input
+            id="mj-from-email"
+            type="email"
+            formControlName="fromEmail"
+            placeholder="toi@email.com"
+          />
+          <small class="field__hint">
+            Elle doit être vérifiée dans Mailjet (Senders & Domains).
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="mj-from-name">Nom de l'expéditeur</label>
+          <input id="mj-from-name" type="text" formControlName="fromName" placeholder="Ton prénom" />
+        </div>
+      </div>
+
+      @if (message(); as info) {
+        <p class="mailjet__retour" [class.is-ok]="info.ok" [class.is-ko]="!info.ok">
+          {{ info.texte }}
+        </p>
+      }
+      @if (test(); as info) {
+        <p class="mailjet__retour" [class.is-ok]="info.ok" [class.is-ko]="!info.ok">
+          {{ info.texte }}
+        </p>
+      }
+
+      <div class="mailjet__actions">
+        <button
+          type="button"
+          class="btn btn--ghost btn--small"
+          [disabled]="form.invalid || mailjet.chargement()"
+          (click)="tester()"
+        >
+          Envoyer un mail de test
+        </button>
+        <button
+          type="button"
+          class="btn btn--primary btn--small"
+          [disabled]="form.invalid || mailjet.chargement()"
+          (click)="enregistrer()"
+        >
+          Enregistrer
+        </button>
+        @if (mailjet.configure()) {
+          <button type="button" class="btn btn--danger btn--small" (click)="supprimer()">
+            Déconnecter
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

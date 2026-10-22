@@ -19,6 +19,7 @@
  */
 
 import { envoyerEmail } from './_lib/mailjet.mjs';
+import { choisirIdentifiants, identifiantsApplication } from './_lib/mailjet-config.mjs';
 import {
   construireHtml,
   construireSujet,
@@ -113,9 +114,14 @@ export default async function handler(req, res) {
     const manquantes = [];
     if (!url) manquantes.push('SUPABASE_URL');
     if (!cle) manquantes.push('SUPABASE_SERVICE_ROLE_KEY');
-    if (!process.env.MAILJET_API_KEY) manquantes.push('MAILJET_API_KEY');
-    if (!process.env.MAILJET_API_SECRET) manquantes.push('MAILJET_API_SECRET');
-    if (!process.env.MAILJET_FROM_EMAIL) manquantes.push('MAILJET_FROM_EMAIL');
+    // Les identifiants Mailjet ne sont pas obligatoires ici : chaque
+    // utilisateur peut avoir le sien (table `mailjet_credentials`).
+    if (!process.env.MAILJET_API_KEY && !process.env.MAILJET_API_SECRET) {
+      manquantes.push('MAILJET_API_KEY (ou comptes Mailjet personnels)');
+    }
+    if (!process.env.MAILJET_FROM_EMAIL && !process.env.MAILJET_API_KEY) {
+      manquantes.push('MAILJET_FROM_EMAIL');
+    }
     if (!appUrl) manquantes.push('APP_URL');
 
     if (manquantes.length > 0) {
@@ -196,6 +202,14 @@ export default async function handler(req, res) {
         continue;
       }
 
+      // Compte Mailjet personnel de l'utilisateur s'il en a un, sinon celui
+      // de l'application.
+      const identifiants = await choisirIdentifiants(url, cle, undefined, userId);
+      const config =
+        identifiants.apiKey && identifiants.apiSecret
+          ? identifiants
+          : identifiantsApplication();
+
       const reponse = await envoyerEmail(
         {
           to: destinataire,
@@ -204,12 +218,7 @@ export default async function handler(req, res) {
           text: construireTexte(relances, appUrl),
           html: construireHtml(relances, appUrl),
         },
-        {
-          apiKey: process.env.MAILJET_API_KEY,
-          apiSecret: process.env.MAILJET_API_SECRET,
-          fromEmail: process.env.MAILJET_FROM_EMAIL,
-          fromName: process.env.MAILJET_FROM_NAME,
-        },
+        config,
       );
 
       if (reponse.ok) {
