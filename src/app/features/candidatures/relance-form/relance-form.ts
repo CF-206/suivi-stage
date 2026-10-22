@@ -17,9 +17,8 @@ import {
 } from '@angular/forms';
 import { Candidature } from '../../../core/models/candidature';
 import { ProfilService } from '../../../core/services/profil.service';
-import { RelanceService } from '../../../core/services/relance.service';
 import { emailValidator } from '../../../core/utils/validators';
-import { construireRelance, mailtoLink } from '../../../core/utils/relance';
+import { construireRelance } from '../../../core/utils/relance';
 
 @Component({
   selector: 'app-relance-form',
@@ -36,9 +35,6 @@ export class RelanceForm {
 
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly profilService = inject(ProfilService);
-
-  /** Envoi direct du mail au recruteur. */
-  protected readonly relanceService = inject(RelanceService);
 
   protected readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
 
@@ -74,32 +70,11 @@ export class RelanceForm {
 
   open(): void {
     this.copie.set(false);
-    this.relanceService.message.set(null);
     this.dialog().nativeElement.showModal();
   }
 
   close(): void {
     this.dialog().nativeElement.close();
-  }
-
-  protected readonly lienMailto = () => mailtoLink(this.form.getRawValue());
-
-  /**
-   * Envoie le mail de relance à l'entreprise, depuis l'adresse du compte
-   * connecté. Si l'envoi réussit, la relance est marquée comme envoyée.
-   */
-  protected async envoyerMail(): Promise<void> {
-    const c = this.candidature();
-    if (!c) return;
-
-    const { destinataire, objet, corps } = this.form.getRawValue();
-    const resultat = await this.relanceService.envoyer(c, destinataire, objet, corps);
-
-    if (resultat.ok) {
-      // Le mail est parti : on compte la relance (le cycle de 7 jours repart).
-      // On ne ferme pas la modale : l'utilisateur voit la confirmation.
-      this.marquer(c);
-    }
   }
 
   protected async copier(): Promise<void> {

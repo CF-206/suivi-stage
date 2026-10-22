@@ -50,13 +50,3 @@ export function construireRelance(
 
   return { destinataire: e.email ?? '', objet, corps };
 }
-
-/** Construit un lien mailto: pour ouvrir la relance dans Outlook. */
-export function mailtoLink(relance: Relance): string {
-  const params = new URLSearchParams({
-    subject: relance.objet,
-    body: relance.corps,
-  });
-  const to = relance.destinataire ? `?${params.toString()}` : `?${params.toString()}`;
-  return `mailto:${encodeURIComponent(relance.destinataire)}${to}`;
-}

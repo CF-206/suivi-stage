@@ -1,16 +1,13 @@
-import { Component, effect, inject, signal, untracked, viewChild } from '@angular/core';
+import { Component, effect, inject, signal, untracked } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { MailjetService } from '../../core/services/mailjet.service';
-import { mailjetValide } from '../../core/models/mailjet';
-import { MailjetConfig } from '../../shared/components/mailjet-config/mailjet-config';
 
 type Mode = 'connexion' | 'inscription';
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule, MailjetConfig],
+  imports: [ReactiveFormsModule],
   templateUrl: './login-page.html',
   styleUrl: './login-page.scss',
 })
@@ -18,10 +15,6 @@ export class LoginPage {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   protected readonly auth = inject(AuthService);
-  private readonly mailjetService = inject(MailjetService);
-
-  /** Bloc optionnel de connexion d'un compte Mailjet personnel. */
-  private readonly mailjetRef = viewChild(MailjetConfig);
 
   protected readonly mode = signal<Mode>('connexion');
   protected readonly busy = signal(false);
@@ -74,21 +67,11 @@ export class LoginPage {
           : await this.auth.inscription(email, motDePasse);
 
       if (ok && this.auth.connecte()) {
-        // Si l'utilisateur a renseigné son compte Mailjet pendant
-        // l'inscription, on l'enregistre maintenant qu'il a une session.
-        await this.enregistrerMailjet();
         await this.router.navigateByUrl('/candidatures');
       }
     } finally {
       this.busy.set(false);
     }
-  }
-
-  /** Enregistre le compte Mailjet personnel saisi pendant l'inscription. */
-  private async enregistrerMailjet(): Promise<void> {
-    const config = this.mailjetRef()?.configCourante();
-    if (!config || !mailjetValide(config)) return;
-    await this.mailjetService.enregistrer(config);
   }
 
   /** Envoie un lien de réinitialisation du mot de passe. */

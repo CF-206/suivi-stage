@@ -24,11 +24,5 @@
         }
       ]
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/envoyer-relances",
-      "schedule": "0 8 * * *"
-    }
   ]
 }

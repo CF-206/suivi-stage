@@ -120,8 +120,7 @@ serveur, aucun service worker) :
 - la notification reste affichée jusqu'au clic (`requireInteraction`).
 
 > ⚠️ Les notifications navigateur ne fonctionnent que tant que l'application
-> est ouverte dans un onglet. Pour être prévenu même en la fermant, il y a
-> l'**email automatique** (voir ci-dessous).
+> est ouverte dans un onglet.
 
 ### Alerte : quand se déclenche-t-elle ?
 
@@ -135,127 +134,21 @@ La **date limite de l'offre** n'est pas une alerte : c'est seulement une
 
 ---
 
-## 2.6 Relances automatiques par email (Mailjet)
+## 2.7 Préparer et marquer une relance
 
-Une **serverless function Vercel** envoie un email quand une relance est due,
-même si l'application est fermée.
-
-```
-Vercel Cron (chaque jour 08:00 UTC)
-        ↓
-/api/envoyer-relances
-        ↓
-Supabase → candidatures dont la relance est due
-        ↓
-Mailjet API v3.1 → email avec le brouillon de relance
-        ↓
-table `relances_envoyees` → pas de doublon
-```
-
-### a. Mise en place
-
-1. **Compte Mailjet** : [app.mailjet.com](https://app.mailjet.com/signup) (gratuit :
-   6 000 emails/mois, 200/jour).
-2. **Vérifier l'expéditeur** : *Account Settings → Senders & Domains → Add a
-   sender address*. L'adresse de signup est validée automatiquement.
-3. **Récupérer les clés** : *Account Settings → API Keys* (clé publique + clé privée).
-4. **Variables d'environnement sur Vercel** (Settings → Environment Variables) :
-
-   | Variable | Valeur |
-   |---|---|
-   | `MAILJET_API_KEY` | clé publique Mailjet |
-   | `MAILJET_API_SECRET` | clé privée Mailjet |
-   | `MAILJET_FROM_EMAIL` | adresse expéditeur (vérifiée) |
-   | `MAILJET_FROM_NAME` | `Suivi Stage` (optionnel) |
-   | `APP_URL` | `https://suivi-stage.vercel.app` |
-   | `SUPABASE_SERVICE_ROLE_KEY` | clé service_role (serveur uniquement) |
-   | `CRON_SECRET` | *(optionnel)* protège l'endpoint |
-
-5. **Table SQL** : `relances_envoyees` est créée par
-   [`supabase/schema.sql`](supabase/schema.sql).
-
-### b. Tester manuellement
-
-```
-https://<ton-app>.vercel.app/api/envoyer-relances
-```
-
-La réponse JSON indique ce qui s'est passé (variables manquantes, relances
-trouvées, emails envoyés).
-
-### c. Contenu de l'email
-
-- le nombre de relances à faire et l'entreprise concernée ;
-- le nombre de jours depuis le dernier envoi ;
-- un bouton **« Préparer la relance »** vers la fiche dans l'app ;
-- un bouton **« ✉️ Relancer par mail »** qui ouvre Outlook avec le brouillon
-  déjà rédigé (même texte que dans l'app).
-
----
-
-## 2.7 Envoyer la relance directement par email
-
-Dans la fiche d'une candidature, le bouton **« 🔔 Relancer »** ouvre la modale
-de relance (le texte d'aide et le brouillon pré-rempli restent inchangés).
-Elle propose 4 actions :
+Dans la fiche d'une candidature, le bouton **« 🔔 Préparer la relance »** ouvre
+la modale de relance : le brouillon est pré-rempli avec les infos de
+l'entreprise et ta signature. Elle propose deux actions :
 
 | Action | Effet |
 |---|---|
 | **Copier le message** | met le brouillon dans le presse-papiers |
-| **Ouvrir dans Outlook** | ouvre Outlook avec un `mailto:` pré-rempli |
-| **📧 Envoyer le mail** | **envoie vraiment l'email** au recruteur |
-| **Marquer la relance envoyée** | pour un envoi fait manuellement |
+| **Marquer la relance envoyée** | pour un envoi fait manuellement (Outlook, Gmail…) |
 
-**Qui envoie, à qui ?**
-
-- **expéditeur** : l'adresse email du **compte connecté** ;
-- **destinataire** : l'adresse de contact de la candidature (champ
-  « Destinataire », modifiable) ;
-- **contenu** : le texte affiché dans la modale (donc ta version si tu la
-  modifies) ;
-- `Reply-To` : ton adresse, pour que la réponse du recruteur arrive chez toi.
-
-Si ton adresse n'est pas validée comme expéditeur chez Mailjet, le mail part
-depuis `MAILJET_FROM_EMAIL` mais le `Reply-To` reste ton adresse.
-
-**Sécurité** : l'endpoint `/api/envoyer-relance` exige le jeton de session
-Supabase de l'utilisateur connecté ; l'email du compte est lu côté serveur
-(aucun email n'est accepté depuis le navigateur).
-
-Après un envoi réussi, la relance est marquée comme envoyée (`dateRelance`,
-`nbRelances`) → le cycle de 7 jours repart.
-
-> En local (`ng serve`), l'endpoint n'existe pas : le bouton affiche un
-> message explicite. L'envoi direct est disponible sur la version en ligne.
-
-### Compte Mailjet personnel (optionnel)
-
-Par défaut, l'application utilise **son propre** compte Mailjet pour tous les
-utilisateurs. Chacun peut brancher **le sien** :
-
-- **à l'inscription** : un bloc optionnel apparaît sous le formulaire
-  (« Connecter mon compte ») ;
-- **plus tard** : dans « Mes infos », section « 📧 Envoi d'emails (Mailjet) ».
-
-Il faut 3 informations (Mailjet → *Account Settings → API Keys*) :
-
-| Champ | Où le trouver |
-|---|---|
-| Clé API | *API Key* (publique) |
-| Clé secrète | *Secret Key* (privée) |
-| Adresse expéditeur | doit être **validée** dans *Senders & Domains* |
-
-Un bouton **« Envoyer un mail de test »** vérifie immédiatement que les
-identifiants sont bons.
-
-**Ce que ça change :** les mails partent depuis **ton** compte Mailjet, avec
-**ton** quota, et ton adresse en expéditeur — le compte de l'application n'est
-plus utilisé.
-
-**Sécurité :** les identifiants sont stockés dans la table
-`mailjet_credentials`, avec une RLS stricte : un utilisateur ne peut lire ni
-modifier que **sa** ligne (vérifié par test automatisé). Ils ne sont jamais
-envoyés dans le bundle du navigateur.
+Le fonctionnement est le suivant : tu copies le message, tu l'envoies toi-même
+depuis ta messagerie, puis tu cliques sur **Marquer la relance envoyée**. La
+relance est alors enregistrée (`dateRelance`, `nbRelances`) → le cycle de
+7 jours repart.
 
 ---
 
@@ -312,8 +205,7 @@ src/app/
 
 supabase/schema.sql        # tables + RLS + policies (à exécuter une fois)
 scripts/generer-env.mjs   # génère src/environments/environment.ts
-api/envoyer-relances.mjs  # serverless function : relances automatiques par email
-vercel.json                # config de déploiement Vercel (+ cron)
+vercel.json                # config de déploiement Vercel
 ```
 
 ---
@@ -339,7 +231,7 @@ vercel.json                # config de déploiement Vercel (+ cron)
 - **Relance hebdomadaire** : l'indicateur 🔔 se recalcule **depuis la dernière
   relance** (7 jours). Cliquer l'indicateur ouvre le brouillon (destinataire =
   email de l'entreprise, objet, corps signé avec mon nom/email/tel) avec deux
-  boutons : **Copier le message** et **Ouvrir dans Outlook** (`mailto:`)
+  boutons : **Copier le message** et **Marquer la relance envoyée**
 - **Notifications** : l'app vérifie toutes les minutes et prévient quand une
   relance devient à faire (une seule fois par candidature, re-notifié au
   cycle suivant). Page **Relances** + cloche dans le header
@@ -355,7 +247,7 @@ vercel.json                # config de déploiement Vercel (+ cron)
 - [x] Vue en cartes + filtres
 - [x] Infos entreprise + recruteur + mes infos + complétion
 - [x] Ajout / édition de candidature (offre et spontanée)
-- [x] Générateur de relance hebdomadaire (copie / ouverture Outlook)
+- [x] Générateur de relance hebdomadaire (copie / marquage envoyée)
 - [x] Notifications navigateur + page Relances
 - [x] Authentification Supabase + synchronisation multi-utilisateur
 - [x] Déploiement Vercel (SPA routing + variables d'environnement)

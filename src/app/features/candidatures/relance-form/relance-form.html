@@ -11,12 +11,6 @@
         Tu peux relancer chaque semaine : le compteur repart de la dernière relance.
       </p>
 
-      @if (relanceService.message(); as info) {
-        <p class="relance__retour" [class.is-ok]="info.ok" [class.is-ko]="!info.ok">
-          {{ info.texte }}
-        </p>
-      }
-
       <div class="field">
         <label for="r-destinataire">Destinataire <em>*</em></label>
         <input
@@ -44,20 +38,6 @@
     <footer class="relance__foot">
       <button type="button" class="btn btn--ghost" (click)="copier()">
         {{ copie() ? 'Copié ✓' : 'Copier le message' }}
-      </button>
-      <a class="btn btn--ghost" [href]="lienMailto()">Ouvrir dans Outlook</a>
-      <button
-        type="button"
-        class="btn btn--soft"
-        [disabled]="form.invalid || relanceService.enCours()"
-        (click)="envoyerMail()"
-        title="Envoie le message à l'adresse de l'entreprise, depuis l'adresse de ton compte"
-      >
-        @if (relanceService.enCours()) {
-          Envoi…
-        } @else {
-          📧 Envoyer le mail
-        }
       </button>
       <button type="submit" class="btn btn--primary" [disabled]="form.invalid">
         Marquer la relance envoyée
