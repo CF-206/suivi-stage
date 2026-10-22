@@ -120,8 +120,8 @@ serveur, aucun service worker) :
 - la notification reste affichée jusqu'au clic (`requireInteraction`).
 
 > ⚠️ Les notifications navigateur ne fonctionnent que tant que l'application
-> est ouverte dans un onglet. Pour être prévenu même en la fermant, il faut
-> un canal externe (email, Telegram…) — voir la Roadmap.
+> est ouverte dans un onglet. Pour être prévenu même en la fermant, il y a
+> l'**email automatique** (voir ci-dessous).
 
 ### Alerte : quand se déclenche-t-elle ?
 
@@ -132,6 +132,64 @@ relance due  ⇔  statut ∈ {nouveau, postulé}
 
 La **date limite de l'offre** n'est pas une alerte : c'est seulement une
 étiquette orange sur la carte.
+
+---
+
+## 2.6 Relances automatiques par email (Mailjet)
+
+Une **serverless function Vercel** envoie un email quand une relance est due,
+même si l'application est fermée.
+
+```
+Vercel Cron (chaque jour 08:00 UTC)
+        ↓
+/api/envoyer-relances
+        ↓
+Supabase → candidatures dont la relance est due
+        ↓
+Mailjet API v3.1 → email avec le brouillon de relance
+        ↓
+table `relances_envoyees` → pas de doublon
+```
+
+### a. Mise en place
+
+1. **Compte Mailjet** : [app.mailjet.com](https://app.mailjet.com/signup) (gratuit :
+   6 000 emails/mois, 200/jour).
+2. **Vérifier l'expéditeur** : *Account Settings → Senders & Domains → Add a
+   sender address*. L'adresse de signup est validée automatiquement.
+3. **Récupérer les clés** : *Account Settings → API Keys* (clé publique + clé privée).
+4. **Variables d'environnement sur Vercel** (Settings → Environment Variables) :
+
+   | Variable | Valeur |
+   |---|---|
+   | `MAILJET_API_KEY` | clé publique Mailjet |
+   | `MAILJET_API_SECRET` | clé privée Mailjet |
+   | `MAILJET_FROM_EMAIL` | adresse expéditeur (vérifiée) |
+   | `MAILJET_FROM_NAME` | `Suivi Stage` (optionnel) |
+   | `APP_URL` | `https://suivi-stage.vercel.app` |
+   | `SUPABASE_SERVICE_ROLE_KEY` | clé service_role (serveur uniquement) |
+   | `CRON_SECRET` | *(optionnel)* protège l'endpoint |
+
+5. **Table SQL** : `relances_envoyees` est créée par
+   [`supabase/schema.sql`](supabase/schema.sql).
+
+### b. Tester manuellement
+
+```
+https://<ton-app>.vercel.app/api/envoyer-relances
+```
+
+La réponse JSON indique ce qui s'est passé (variables manquantes, relances
+trouvées, emails envoyés).
+
+### c. Contenu de l'email
+
+- le nombre de relances à faire et l'entreprise concernée ;
+- le nombre de jours depuis le dernier envoi ;
+- un bouton **« Préparer la relance »** vers la fiche dans l'app ;
+- un bouton **« ✉️ Relancer par mail »** qui ouvre Outlook avec le brouillon
+  déjà rédigé (même texte que dans l'app).
 
 ---
 
@@ -188,7 +246,8 @@ src/app/
 
 supabase/schema.sql        # tables + RLS + policies (à exécuter une fois)
 scripts/generer-env.mjs   # génère src/environments/environment.ts
-vercel.json                # config de déploiement Vercel
+api/envoyer-relances.mjs  # serverless function : relances automatiques par email
+vercel.json                # config de déploiement Vercel (+ cron)
 ```
 
 ---

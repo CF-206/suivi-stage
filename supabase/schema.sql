@@ -38,6 +38,19 @@ create table if not exists public.profils (
   updated_at timestamptz not null default now()
 );
 
+-- 2b. Table des relances notifiées par email ----------------------------------
+-- Écriture uniquement par la serverless function Vercel (clé service_role).
+-- La clé est (candidature_id, cycle) : quand la relance est faite, la date de
+-- référence change -> un nouveau cycle -> on peut re-notifier.
+create table if not exists public.relances_envoyees (
+  candidature_id text not null,
+  cycle         text not null,
+  sent_at       timestamptz not null default now(),
+  primary key (candidature_id, cycle)
+);
+
+alter table public.relances_envoyees enable row level security;
+
 -- 3. Index utiles -------------------------------------------------------------
 create index if not exists candidatures_user_id_idx
   on public.candidatures (user_id);
