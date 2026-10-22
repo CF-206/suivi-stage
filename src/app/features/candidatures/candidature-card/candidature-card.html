@@ -49,10 +49,7 @@
     } @else if (joursAvantRelance() !== null) {
       <span class="tag">🔔 Relance dans {{ joursAvantRelance() }}j</span>
     }
-    @if (candidature().entreprise.email) {
-      <span class="tag tag--mail">✉️ Contact dispo</span>
-    }
-  </div>
+    </div>
 
   <footer class="card__foot">
     <app-completion-bar [compact]="true" [completion]="completion()" />
