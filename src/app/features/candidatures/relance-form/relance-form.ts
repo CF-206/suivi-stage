@@ -85,20 +85,22 @@ export class RelanceForm {
   protected readonly lienMailto = () => mailtoLink(this.form.getRawValue());
 
   /**
-   * Envoie le mail de relance à l'entreprise, depuis l'adresse du compte
-   * connecté. Si l'envoi réussit, la relance est marquée comme envoyée.
+   * Prépare l'envoi du mail de relance en générant un lien mailto.
+   * L'utilisateur peut cliquer sur "Ouvrir dans Outlook" ou le lien apparaitra.
+   * Si l'envoi réussit, la relance est marquée comme envoyée.
    */
   protected async envoyerMail(): Promise<void> {
     const c = this.candidature();
     if (!c) return;
 
-    const { destinataire, objet, corps } = this.form.getRawValue();
-    const resultat = await this.relanceService.envoyer(c, destinataire, objet, corps);
+    const profil = this.profilService.profil();
+    const resultat = await this.relanceService.preparer(c, profil);
 
     if (resultat.ok) {
-      // Le mail est parti : on compte la relance (le cycle de 7 jours repart).
-      // On ne ferme pas la modale : l'utilisateur voit la confirmation.
+      this.relanceService.message.set({ ok: true, texte: resultat.texte });
       this.marquer(c);
+    } else {
+      this.relanceService.message.set({ ok: false, texte: resultat.texte });
     }
   }
 
