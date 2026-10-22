@@ -148,7 +148,13 @@
               >
                 🔔 Préparer la relance
               </button>
-              </div>
+              @if (c.entreprise.email) {
+                <a class="btn btn--ghost btn--small" [href]="'mailto:' + c.entreprise.email">
+                  ✉️ Écrire
+                </a>
+              }
+            </div>
+          } @else {
             <p class="muted muted--block">
               Personne en charge du recrutement n'est renseignée. Ajoute-la via
               <em>Modifier</em> pour personnaliser la relance.

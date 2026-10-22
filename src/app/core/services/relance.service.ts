@@ -1,7 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Candidature } from '../models/candidature';
 import { Profil } from '../models/profil';
-import { mailtoLink, construireRelance } from '../utils/relance';
 import { SupabaseService } from './supabase.service';
 
 /** Résultat de l'envoi d'une relance. */
@@ -9,16 +8,17 @@ export interface ResultatEnvoi {
   ok: boolean;
   /** Message à afficher (succès ou erreur). */
   texte: string;
-  /** Lien mailto généré (ouvert dans le client mail de l'utilisateur). */
-  lienMailto?: string;
+  /** Adresse utilisé comme expéditeur. */
+  expediteur?: string;
 }
 
 /**
- * Service d'envoi de relance par email.
+ * Envoi direct du mail de relance au recruteur.
  *
- * Utilise des liens mailto: pour ouvrir le client mail de l'utilisateur
- * (Outlook, Gmail, etc.). Cela ne nécessite pas d'API Mailjet ni de
- * compte serveur - l'email part directement depuis la boîte de l'utilisateur.
+ * L'app appelle la serverless function `/api/envoyer-relance` (déployée sur
+ * Vercel) en passant son jeton de session Supabase : c'est donc l'adresse du
+ * compte connecté qui sert d'expéditeur, et la RLS garantit qu'on ne peut
+ * agir que sur ses propres candidatures.
  */
 @Injectable({ providedIn: 'root' })
 export class RelanceService {
@@ -30,41 +30,91 @@ export class RelanceService {
   /** Dernier message (succès ou erreur) affiché dans la modale. */
   readonly message = signal<{ ok: boolean; texte: string } | null>(null);
 
-  /** Dernier lien mailto généré. */
-  readonly lienGeneré = signal<string | null>(null);
-
   /**
-   * Prépare une relance en générant un lien mailto:.
-   * L'utilisateur doit cliquer sur le lien ou sur le bouton "Ouvrir dans Outlook"
-   * dans l'interface pour envoyer le mail depuis sa propre boîte.
-   *
+   * Envoie la relance par email.
    * @param candidature la candidature relancée
-   * @param profil les informations de l'utilisateur (nom, email, téléphone)
+   * @param destinataire adresse du recruteur
+   * @param objet objet du mail
+   * @param corps corps du mail
    */
-  async preparer(
+  async envoyer(
     candidature: Candidature,
-    profil: Profil,
+    destinataire: string,
+    objet: string,
+    corps: string,
   ): Promise<ResultatEnvoi> {
     this.enCours.set(true);
     this.message.set(null);
-    this.lienGeneré.set(null);
 
     try {
-      const relance = construireRelance(candidature, profil);
-      const lien = mailtoLink(relance);
+      const client = this.supabase.client;
+      if (!client) {
+        const erreur = {
+          ok: false,
+          texte: "Supabase n'est pas configuré : envoi d'email impossible.",
+        };
+        this.message.set(erreur);
+        return erreur;
+      }
 
-      this.lienGeneré.set(lien);
+      const { data } = await client.auth.getSession();
+      const jeton = data.session?.access_token;
+      if (!jeton) {
+        const erreur = { ok: false, texte: 'Session expirée : reconnecte-toi.' };
+        this.message.set(erreur);
+        return erreur;
+      }
 
-      return {
-        ok: true,
-        texte: 'Préparation de la relance effectuée ✓',
-        lienMailto: lien,
-      };
-    } catch (e) {
+      const reponse = await fetch('/api/envoyer-relance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${jeton}`,
+        },
+        body: JSON.stringify({
+          candidatureId: candidature.id,
+          destinataire,
+          objet,
+          corps,
+          entreprise: candidature.entreprise,
+          candidat: candidature.candidat,
+        }),
+      });
+
+      const type = reponse.headers.get('content-type') ?? '';
+      if (!type.includes('application/json')) {
+        // En local (ng serve), l'endpoint n'existe pas : la page renvoie du HTML.
+        const erreur = {
+          ok: false,
+          texte:
+            "L'envoi direct n'est disponible que sur la version en ligne (Vercel). En local, utilise « Ouvrir dans Outlook ».",
+        };
+        this.message.set(erreur);
+        return erreur;
+      }
+
+      const data2 = await reponse.json();
+
+      if (!reponse.ok || !data2?.ok) {
+        const erreur = {
+          ok: false,
+          texte: data2?.error ?? `Erreur ${reponse.status}`,
+        };
+        this.message.set(erreur);
+        return erreur;
+      }
+
+      const succes = { ok: true, texte: data2.message ?? 'Mail envoyé.' };
+      this.message.set(succes);
+      return { ...succes, expediteur: data2.expediteur };    } catch (e) {
       const erreur = {
         ok: false,
         texte:
-          e instanceof Error ? e.message : String(e),
+          e instanceof Error && e.message.includes('Failed to fetch')
+            ? "Impossible de joindre le serveur d'envoi (connexion ?)."
+            : e instanceof Error
+              ? e.message
+              : String(e),
       };
       this.message.set(erreur);
       return erreur;
